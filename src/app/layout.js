@@ -8,7 +8,21 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata = {
   title: "Projekt 1455",
-  description: "Countdown to 2030",
+  description: "A disciplined daily journaling application.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    title: "1455",
+    statusBarStyle: "black-translucent",
+    startupImage: ["/icons/icon-512x512.png"],
+  },
+};
+
+export const viewport = {
+  themeColor: "#0a0a0a",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 import { AuthProvider } from "@/context/AuthContext";
