@@ -10,6 +10,11 @@ export const metadata = {
   title: "Projekt 1455",
   description: "A disciplined daily journaling application.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icons/icon-192x192.png",
+    shortcut: "/icons/icon-192x192.png",
+    apple: "/icons/icon-512x512.png",
+  },
   appleWebApp: {
     title: "1455",
     statusBarStyle: "black-translucent",

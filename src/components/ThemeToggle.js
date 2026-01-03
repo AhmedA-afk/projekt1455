@@ -12,6 +12,12 @@ export default function ThemeToggle() {
         const savedTheme = localStorage.getItem("theme") || "dark";
         setTheme(savedTheme);
         document.documentElement.setAttribute("data-theme", savedTheme);
+
+        // Update PWA Status Bar
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+            metaThemeColor.setAttribute("content", savedTheme === "dark" ? "#0a0a0a" : "#ffffff");
+        }
     }, []);
 
     const toggleTheme = () => {
@@ -19,6 +25,12 @@ export default function ThemeToggle() {
         setTheme(newTheme);
         localStorage.setItem("theme", newTheme);
         document.documentElement.setAttribute("data-theme", newTheme);
+
+        // Update PWA Status Bar
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+            metaThemeColor.setAttribute("content", newTheme === "dark" ? "#0a0a0a" : "#ffffff");
+        }
     };
 
     if (!mounted) return null;
