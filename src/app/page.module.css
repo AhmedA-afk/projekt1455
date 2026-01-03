@@ -10,24 +10,25 @@
 }
 
 .countdownWrapper {
-  margin-top: 8rem;
-  transform: scale(0.6);
-  /* Make the detailed countdown smaller/subtle */
+  margin-top: 3rem;
+  /* Reduced from 8rem */
+  /* Scale removed to prevent ghost spacing */
   opacity: 0.6;
   transition: opacity 0.3s ease;
 }
 
 @media (max-width: 768px) {
   .countdownWrapper {
-    transform: scale(0.4);
-    /* Smaller on mobile to fit */
-    margin-top: 2rem;
+    margin-top: 0rem;
+    /* Tighten mobile gap significantly */
   }
 
   .main {
     padding: 1rem;
   }
 }
+
+
 
 .countdownWrapper:hover {
   opacity: 1;

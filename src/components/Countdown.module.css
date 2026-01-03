@@ -11,7 +11,8 @@
 }
 
 .number {
-    font-size: 12rem;
+    font-size: 8rem;
+    /* effective size (was 12rem * 0.6 scale) */
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.05em;
@@ -20,20 +21,21 @@
 }
 
 .label {
-    font-size: 1rem;
+    font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.2em;
     opacity: 0.5;
-    margin-top: 1rem;
+    margin-top: 0.8rem;
 }
 
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .number {
-        font-size: 6rem;
+        font-size: 4rem;
+        /* effective size mobile */
     }
 }
