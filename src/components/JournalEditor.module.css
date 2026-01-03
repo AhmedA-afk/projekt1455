@@ -1,0 +1,157 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* Sticky Toolbar */
+.toolbar {
+    position: sticky;
+    top: 100px;
+    /* Clear the floating header (2rem + 60px + buffer) */
+    z-index: 10;
+
+    /* Use RGB variable for semi-transparent background matching theme */
+    background: rgba(var(--background-rgb), 0.8);
+    backdrop-filter: blur(10px);
+
+    border: 1px solid rgba(128, 128, 128, 0.1) !important;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    padding: 0.5rem !important;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    transition: all 0.3s ease;
+}
+
+.documentArea {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.titleInput {
+    background: transparent;
+    border: none;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--foreground);
+    outline: none;
+    width: 100%;
+    font-family: var(--font-inter);
+    padding: 0 1rem;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 0.5rem;
+    }
+
+    .toolbar {
+        top: 80px;
+        /* Mobile header is smaller/different offset */
+        /* Stick to very top */
+        padding: 0.25rem !important;
+        border-radius: 0 0 8px 8px;
+        /* Only round bottom corners */
+        gap: 0.5rem;
+    }
+
+    .titleInput {
+        font-size: 1.8rem;
+    }
+}
+
+.titleInput::placeholder {
+    opacity: 0.2;
+}
+
+/* Quill Overrides */
+.quill :global(.ql-container) {
+    border: none !important;
+    font-family: var(--font-inter) !important;
+    font-size: 1.1rem !important;
+}
+
+.quill :global(.ql-editor) {
+    padding: 0 1rem 4rem 1rem !important;
+    min-height: 400px;
+    line-height: 1.6;
+    color: var(--foreground);
+}
+
+.quill :global(.ql-editor.ql-blank::before) {
+    opacity: 0.3;
+    font-style: normal;
+    left: 1rem !important;
+    color: var(--foreground);
+}
+
+/* Theme adaptation for toolbar icons */
+/* DEFAULT: Dark Theme style (since app defaults to dark) */
+.toolbar :global(.ql-stroke) {
+    stroke: #888;
+}
+
+.toolbar :global(.ql-fill) {
+    fill: #888;
+}
+
+.toolbar :global(.ql-picker) {
+    color: #888;
+}
+
+.toolbar :global(.ql-picker-label) {
+    color: #888;
+}
+
+.toolbar :global(.ql-active .ql-stroke) {
+    stroke: var(--foreground);
+}
+
+.toolbar :global(.ql-active .ql-fill) {
+    fill: var(--foreground);
+}
+
+/* Explicit overrides if needed, but inheriting via CSS variables is better */
+/* Since we have Global attributes [data-theme], we can use :global() */
+
+:global([data-theme="light"]) .toolbar :global(.ql-stroke) {
+    stroke: #666;
+}
+
+:global([data-theme="light"]) .toolbar :global(.ql-fill) {
+    fill: #666;
+}
+
+:global([data-theme="light"]) .toolbar :global(.ql-picker) {
+    color: #666;
+}
+
+:global([data-theme="light"]) .toolbar :global(.ql-picker-label) {
+    color: #666;
+}
+
+:global([data-theme="light"]) .toolbar :global(.ql-active .ql-stroke) {
+    stroke: #000;
+}
+
+:global([data-theme="light"]) .toolbar :global(.ql-active .ql-fill) {
+    fill: #000;
+}
+
+
+/* Clean up toolbar borders */
+.toolbar :global(.ql-formats) {
+    margin-right: 15px !important;
+    border-right: 1px solid rgba(128, 128, 128, 0.2);
+    padding-right: 15px;
+}
+
+.toolbar :global(.ql-formats:last-child) {
+    border-right: none;
+}

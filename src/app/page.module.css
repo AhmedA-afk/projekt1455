@@ -1,0 +1,34 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.countdownWrapper {
+  margin-top: 8rem;
+  transform: scale(0.6);
+  /* Make the detailed countdown smaller/subtle */
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .countdownWrapper {
+    transform: scale(0.4);
+    /* Smaller on mobile to fit */
+    margin-top: 2rem;
+  }
+
+  .main {
+    padding: 1rem;
+  }
+}
+
+.countdownWrapper:hover {
+  opacity: 1;
+}

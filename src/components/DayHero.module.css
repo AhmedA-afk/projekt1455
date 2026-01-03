@@ -1,0 +1,32 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.days {
+    font-size: 12rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.date {
+    font-size: 1.2rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    opacity: 0.5;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .days {
+        font-size: 6rem;
+    }
+}
