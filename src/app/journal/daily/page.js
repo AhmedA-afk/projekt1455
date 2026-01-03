@@ -16,64 +16,71 @@ export default function DailyJournal() {
     const [content, setContent] = useState("");
     const [mounted, setMounted] = useState(false);
 
+    const { user, loading } = useAuth(); // Get authenticated user
+
     useEffect(() => {
         setMounted(true);
         const today = getDaysRemaining();
         setPageNumber(today); // Start at today
-
-        // Load data for today
-        loadEntry(today);
     }, []);
 
-    const loadEntry = (day) => {
-        const saved = localStorage.getItem(`journal_daily_${day}`);
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            setTitle(parsed.title || "");
-            setContent(parsed.content || "");
-        } else {
-            setTitle("");
-            setContent("");
-        }
-    };
-
-    const saveEntry = (currentDay, newTitle, newContent) => {
-        const entry = { title: newTitle, content: newContent, timestamp: new Date().toISOString() };
-        localStorage.setItem(`journal_daily_${currentDay}`, JSON.stringify(entry));
-    };
-
-    // Auto-save effect
+    // Load Data from Firestore
     useEffect(() => {
-        if (pageNumber !== null && mounted) {
-            const timer = setTimeout(() => {
-                saveEntry(pageNumber, title, content);
-            }, 1000);
-            return () => clearTimeout(timer);
+        if (!user || pageNumber === null) return;
+
+        async function fetchData() {
+            try {
+                const docRef = doc(db, "users", user.uid, "daily", String(pageNumber));
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    setTitle(data.title || "");
+                    setContent(data.content || "");
+                } else {
+                    setTitle("");
+                    setContent("");
+                }
+            } catch (e) {
+                console.error("Error fetching daily journal:", e);
+            }
         }
-    }, [title, content, pageNumber, mounted]);
+        fetchData();
+    }, [user, pageNumber]);
+
+    // Save Data to Firestore (Debounced)
+    useEffect(() => {
+        if (!user || pageNumber === null || !mounted) return;
+
+        const timer = setTimeout(async () => {
+            try {
+                const docRef = doc(db, "users", user.uid, "daily", String(pageNumber));
+                await setDoc(docRef, {
+                    title,
+                    content,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+            } catch (e) {
+                console.error("Error saving daily journal:", e);
+            }
+        }, 1500); // 1.5s debounce
+
+        return () => clearTimeout(timer);
+    }, [title, content, user, pageNumber, mounted]);
 
     const handlePrev = () => {
-        const nextDay = pageNumber + 1; // Previous day chronologically is a higher countdown number (1456 comes before 1455 in countdown logic? Wait.)
-        // Countdown: 1455 (Today) -> 1454 (Tomorrow).
-        // So "Previous Day" (Yesterday) was 1456.
-        // "Page Number" usually implies Order.
-        // If Page 1455 is Today. 
-        // User said: "left days 1455- 1454-1453 as page number".
-        // Left arrow should go to 1456 (Yesterday)? Or Left arrow goes to 1454 (Tomorrow)?
-        // Usually Left = Back = Past. Past was 1456.
-        // Right = Forward = Future. Future is 1454.
-        // Let's implement that logic.
-
         const newPage = pageNumber + 1;
         setPageNumber(newPage);
-        loadEntry(newPage);
     };
 
     const handleNext = () => {
         const newPage = pageNumber - 1;
         setPageNumber(newPage);
-        loadEntry(newPage);
     };
+
+    // Auth Protection
+    if (loading) return null;
+    if (!user) return <Login />;
 
     if (!mounted || pageNumber === null) return null;
 
