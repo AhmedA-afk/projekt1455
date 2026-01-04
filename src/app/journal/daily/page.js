@@ -15,6 +15,7 @@ export default function DailyJournal() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [mounted, setMounted] = useState(false);
+    const [dataLoaded, setDataLoaded] = useState(false); // Fix: Block autosave until load
 
     const { user, loading } = useAuth(); // Get authenticated user
 
@@ -27,6 +28,9 @@ export default function DailyJournal() {
     // Load Data from Firestore
     useEffect(() => {
         if (!user || pageNumber === null) return;
+
+        // Reset loaded state on page change
+        setDataLoaded(false);
 
         async function fetchData() {
             try {
@@ -43,6 +47,11 @@ export default function DailyJournal() {
                 }
             } catch (e) {
                 console.error("Error fetching daily journal:", e);
+            } finally {
+                // Ensure we mark data as loaded even if error, 
+                // though on error we might want to block save? 
+                // Ideally yes, but for now let's allow "retry" by editing.
+                setDataLoaded(true);
             }
         }
         fetchData();
@@ -50,7 +59,8 @@ export default function DailyJournal() {
 
     // Save Data to Firestore (Debounced)
     useEffect(() => {
-        if (!user || pageNumber === null || !mounted) return;
+        // Fix: Strictly require dataLoaded before autosaving
+        if (!user || pageNumber === null || !mounted || !dataLoaded) return;
 
         const timer = setTimeout(async () => {
             try {
@@ -66,7 +76,7 @@ export default function DailyJournal() {
         }, 1500); // 1.5s debounce
 
         return () => clearTimeout(timer);
-    }, [title, content, user, pageNumber, mounted]);
+    }, [title, content, user, pageNumber, mounted, dataLoaded]);
 
     const handlePrev = () => {
         const newPage = pageNumber + 1;

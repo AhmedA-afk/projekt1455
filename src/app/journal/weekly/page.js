@@ -17,6 +17,7 @@ export default function WeeklyArtefacts() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [mounted, setMounted] = useState(false);
+    const [dataLoaded, setDataLoaded] = useState(false); // Fix: Block autosave until load
 
     const { user, loading } = useAuth();
 
@@ -29,6 +30,9 @@ export default function WeeklyArtefacts() {
 
     useEffect(() => {
         if (!user || weekNumber === null) return;
+
+        setDataLoaded(false); // Reset on change
+
         // Fetch logic separated
         const docRef = doc(db, "users", user.uid, "weekly", String(weekNumber));
         getDoc(docRef).then(docSnap => {
@@ -40,12 +44,13 @@ export default function WeeklyArtefacts() {
                 setTitle("");
                 setContent("");
             }
+            setDataLoaded(true); // Allow saving now
         });
     }, [user, weekNumber]);
 
     // Save to Firestore (Debounced)
     useEffect(() => {
-        if (!user || weekNumber === null || !mounted) return;
+        if (!user || weekNumber === null || !mounted || !dataLoaded) return;
 
         const timer = setTimeout(async () => {
             try {
@@ -61,7 +66,7 @@ export default function WeeklyArtefacts() {
         }, 1500); // 1.5s debounce
 
         return () => clearTimeout(timer);
-    }, [title, content, user, weekNumber, mounted]);
+    }, [title, content, user, weekNumber, mounted, dataLoaded]);
 
     // Auth Protection
     if (loading) return null;
