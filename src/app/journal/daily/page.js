@@ -121,13 +121,19 @@ export default function DailyJournal() {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
                     </button>
                 </div>
-                
-                <div className={styles.statusIndicator}>
-                    {status === "loading" && <span style={{color: "#888"}}>Loading...</span>}
-                    {status === "saving" && <span style={{color: "#eda536"}}>Saving...</span>}
-                    {status === "saved" && <span style={{color: "#4caf50"}}>All Changes Saved</span>}
-                    {status === "error" && <span style={{color: "#f44336", fontWeight: "bold"}}>⚠️ Sync Error - Read Only</span>}
-                </div>
+                <div
+                    className={`${styles.statusDot} ${status === 'loading' ? styles.statusLoading :
+                            status === 'saving' ? styles.statusSaving :
+                                status === 'saved' ? styles.statusSaved :
+                                    status === 'error' ? styles.statusError : ''
+                        }`}
+                    title={
+                        status === 'loading' ? "Loading..." :
+                            status === 'saving' ? "Saving..." :
+                                status === 'saved' ? "All Changes Saved" :
+                                    status === 'error' ? "Sync Error - Read Only" : ""
+                    }
+                />
             </header>
 
             <JournalEditor
