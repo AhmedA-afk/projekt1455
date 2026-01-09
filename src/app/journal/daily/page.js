@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import JournalEditor from "@/components/JournalEditor";
 import styles from "./page.module.css";
 import { useAuth } from "@/context/AuthContext";
@@ -16,6 +16,7 @@ export default function DailyJournal() {
     const [content, setContent] = useState("");
     const [mounted, setMounted] = useState(false);
     const [dataLoaded, setDataLoaded] = useState(false); // Fix: Block autosave until load
+    const isLoadedRef = useRef(false); // Ref for synchronous status tracking
 
     const { user, loading } = useAuth(); // Get authenticated user
 
@@ -31,6 +32,7 @@ export default function DailyJournal() {
 
         // Reset loaded state on page change
         setDataLoaded(false);
+        isLoadedRef.current = false;
 
         async function fetchData() {
             try {
@@ -52,6 +54,7 @@ export default function DailyJournal() {
                 // though on error we might want to block save? 
                 // Ideally yes, but for now let's allow "retry" by editing.
                 setDataLoaded(true);
+                isLoadedRef.current = true;
             }
         }
         fetchData();
@@ -60,7 +63,7 @@ export default function DailyJournal() {
     // Save Data to Firestore (Debounced)
     useEffect(() => {
         // Fix: Strictly require dataLoaded before autosaving
-        if (!user || pageNumber === null || !mounted || !dataLoaded) return;
+        if (!user || pageNumber === null || !mounted || !isLoadedRef.current) return;
 
         const timer = setTimeout(async () => {
             try {
