@@ -6,7 +6,7 @@ import styles from "./page.module.css";
 import { useAuth } from "@/context/AuthContext";
 import Login from "@/components/Login";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 
 import { getDaysRemaining } from "@/lib/dateUtils";
 
@@ -15,6 +15,7 @@ export default function DailyJournal() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [mounted, setMounted] = useState(false);
+    const [status, setStatus] = useState("loading"); // 'loading' | 'saved' | 'saving' | 'error'
     const [dataLoaded, setDataLoaded] = useState(false); // Fix: Block autosave until load
     const isLoadedRef = useRef(false); // Ref for synchronous status tracking
 
@@ -32,42 +33,47 @@ export default function DailyJournal() {
 
         // Reset loaded state on page change
         setDataLoaded(false);
+        setStatus("loading");
         isLoadedRef.current = false;
 
         // Clear previous data immediately to prevent bleeding if fetch fails
         setTitle("");
         setContent("");
 
-        async function fetchData() {
-            try {
-                const docRef = doc(db, "users", user.uid, "daily", String(pageNumber));
-                const docSnap = await getDoc(docRef);
+        const docRef = doc(db, "users", user.uid, "daily", String(pageNumber));
 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    setTitle(data.title || "");
-                    setContent(data.content || "");
-                } else {
-                    setTitle("");
-                    setContent("");
-                }
-            } catch (e) {
-                console.error("Error fetching daily journal:", e);
-            } finally {
-                // Ensure we mark data as loaded even if error, 
-                // though on error we might want to block save? 
-                // Ideally yes, but for now let's allow "retry" by editing.
-                setDataLoaded(true);
-                isLoadedRef.current = true;
+        // Real-time listener
+        const unsubscribe = onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                // We use function functional updates or direct checking can reduce re-renders 
+                // but for strings simple set is usually fine relative to 1.5s debounce
+                setTitle(data.title || "");
+                setContent(data.content || "");
+            } else {
+                setTitle("");
+                setContent("");
             }
-        }
-        fetchData();
+            // Enable saving once we've successfully received a snapshot
+            setDataLoaded(true);
+            isLoadedRef.current = true;
+            setStatus("saved");
+        }, (error) => {
+            console.error("Error listening to daily journal:", error);
+            // Safety: Do NOT enable saving on error
+            setStatus("error");
+        });
+
+        // Cleanup listener on unmount or page change
+        return () => unsubscribe();
     }, [user, pageNumber]);
 
     // Save Data to Firestore (Debounced)
     useEffect(() => {
         // Fix: Strictly require dataLoaded before autosaving
         if (!user || pageNumber === null || !mounted || !isLoadedRef.current) return;
+
+        setStatus("saving");
 
         const timer = setTimeout(async () => {
             try {
@@ -77,8 +83,10 @@ export default function DailyJournal() {
                     content,
                     updatedAt: new Date().toISOString()
                 }, { merge: true });
+                setStatus("saved");
             } catch (e) {
                 console.error("Error saving daily journal:", e);
+                setStatus("error");
             }
         }, 1500); // 1.5s debounce
 
@@ -112,6 +120,13 @@ export default function DailyJournal() {
                     <button onClick={handleNext} className={styles.navBtn} title="Next Day (Lower Count)">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
                     </button>
+                </div>
+                
+                <div className={styles.statusIndicator}>
+                    {status === "loading" && <span style={{color: "#888"}}>Loading...</span>}
+                    {status === "saving" && <span style={{color: "#eda536"}}>Saving...</span>}
+                    {status === "saved" && <span style={{color: "#4caf50"}}>All Changes Saved</span>}
+                    {status === "error" && <span style={{color: "#f44336", fontWeight: "bold"}}>⚠️ Sync Error - Read Only</span>}
                 </div>
             </header>
 
