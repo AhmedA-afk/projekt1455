@@ -34,6 +34,10 @@ export default function DailyJournal() {
         setDataLoaded(false);
         isLoadedRef.current = false;
 
+        // Clear previous data immediately to prevent bleeding if fetch fails
+        setTitle("");
+        setContent("");
+
         async function fetchData() {
             try {
                 const docRef = doc(db, "users", user.uid, "daily", String(pageNumber));
